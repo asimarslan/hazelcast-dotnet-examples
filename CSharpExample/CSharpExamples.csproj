@@ -49,7 +49,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>Hazelcast.Client.Example.SimpleExample1</StartupObject>
+    <StartupObject>Hazelcast.Client.Example.ExampleWithCustomSerializer</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -60,6 +60,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExampleWithCustomSerializer.cs" />
     <Compile Include="SimpleExample1.cs" />
   </ItemGroup>
   <ItemGroup>
