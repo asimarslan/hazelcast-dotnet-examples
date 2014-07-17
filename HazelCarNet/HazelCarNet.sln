@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HazelCarNet", "HazelCarNet.csproj", "{EC00BBC3-B48C-4A8B-B95C-8A5890E0CBEC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EC00BBC3-B48C-4A8B-B95C-8A5890E0CBEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC00BBC3-B48C-4A8B-B95C-8A5890E0CBEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC00BBC3-B48C-4A8B-B95C-8A5890E0CBEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC00BBC3-B48C-4A8B-B95C-8A5890E0CBEC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
