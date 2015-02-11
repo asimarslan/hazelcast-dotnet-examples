@@ -31,9 +31,13 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>ClientPerformance.Performance</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Metrics">
-      <HintPath>..\packages\Metrics.NET.0.2.14\lib\net45\Metrics.dll</HintPath>
+    <Reference Include="Metrics, Version=0.2.14.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Metrics.NET-net40.0.2.14\lib\net40\Metrics.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

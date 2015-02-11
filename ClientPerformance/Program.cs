@@ -1,42 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Hazelcast.Client;
-using Hazelcast.Config;
 using Hazelcast.Core;
 using Metrics;
-using Metrics.Utils;
-using Metrics.Reporters;
 using Timer = Metrics.Timer;
 
 namespace ClientPerformance
 {
     class Performance
     {
-        
-    //    public File cvsDir = new File( System.getProperty("cvsDir", "/Users/danny") );
- 
-    //public String clientHzFile = System.getProperty("clientHzFile", "client-hazelcast.xml");
-    //public String baseMapName= System.getProperty("baseMapName", "m");
-    //public int totalMaps =  Integer.parseInt(System.getProperty("totalMaps", "10"));
-    //public int totalKeys = Integer.parseInt(System.getProperty("totalKeys", "10"));
-    //public int valueByteArraySize = Integer.parseInt(System.getProperty("valueByteArraySize", "10"));
- 
-    //public double putProb=Double.parseDouble(System.getProperty("putProb", "0.5"));
-    //public double getProb=Double.parseDouble(System.getProperty("getProb", "0.5"));
-    //public double setProb=Double.parseDouble(System.getProperty("setProb", "0.0"));
- 
-    //public int threadCount = Integer.parseInt(System.getProperty("threadCount", "8"));;
-    //public boolean sharedMetrics = Boolean.parseBoolean(System.getProperty("sharedMetrics", "true"));;
- 
-    //private HazelcastInstance client;
-    //private ExecutorService executor;
-    //private Set<MyTask> tasks;
-    //private int durationSeconds=0;
-
         public static string cvsDir = ReadEnvVar("cvsDir", ".\\csv");//TODO MAKE IT WINDOWS LOCATION
 
         public String clientHzFile = ReadEnvVar("clientHzFile", "client-hazelcast.xml");
@@ -53,7 +28,7 @@ namespace ClientPerformance
         public static int sharedMetrics = (int)ReadEnvironmentVar("sharedMetrics", 1);
 
         private static IHazelcastInstance client;
-        private LimitedConcurrencyLevelTaskScheduler executor;
+        //private LimitedConcurrencyLevelTaskScheduler executor;
         private ISet<MyTask> tasks;
         private int durationSeconds=0;
 
@@ -61,21 +36,13 @@ namespace ClientPerformance
 
         public Performance()
         {
-            executor = new LimitedConcurrencyLevelTaskScheduler(threadCount);
-            factory = new TaskFactory(executor);
-            //client = HazelcastClient.NewHazelcastClient(clientHzFile);
-
-            var clientConfig = new ClientConfig();
-            clientConfig.GetNetworkConfig().AddAddress("192.168.2.39");
-            clientConfig.GetNetworkConfig().SetConnectionAttemptLimit(1000);
-            client = HazelcastClient.NewHazelcastClient(clientConfig);
+            client = HazelcastClient.NewHazelcastClient(clientHzFile);
 
             tasks = new HashSet<MyTask>();
             for (int i = 0; i < threadCount; i++)
             {
                 tasks.Add(new MyTask());
             }
-
         }
 
         static String ReadEnvVar(String var, String defaultVal)
@@ -97,44 +64,25 @@ namespace ClientPerformance
 
         static void Main(string[] args)
         {
+            Console.WriteLine(Directory.GetCurrentDirectory());
+            Metric.Config.WithReporting(report => report.WithCSVReports(cvsDir, TimeSpan.FromSeconds(15)));
+
+            //Metric.Config.WithReporting(report => report.WithConsoleReport(TimeSpan.FromSeconds(10)));
+
             int jitWarmUpSec = (int)ReadEnvironmentVar("jitWarmUpSec", 10);
             int durationSec = (int)ReadEnvironmentVar("durationSec", 30);
 
             Performance p = new Performance();
             p.run(jitWarmUpSec);
 
-            p.run(durationSec);
-            p.printResults();
-
-            
-            
+            p.run(durationSec);  
+  
+            client.Shutdown();
         }
-
-        public void printResults()
-        {
-            var csvFileAppender = new CSVFileAppender(cvsDir, ",");
-            foreach(MyTask t in tasks)
-            {
-                var report = new CSVReport(csvFileAppender);
-
-                report.RunReport(t.metrics.DataProvider.CurrentMetricsData, () => { return new Metrics.HealthStatus(); }, new CancellationToken());
-
-                //ConsoleReport reporter = ConsoleReport.forRegistry(t.metrics).build();
-                //CSVReport csv = CSVReport.forRegistry(t.metrics).build(cvsDir);
-
-                //csv.RunReport();
-                //reporter.RunReport();
-
-                if(sharedMetrics>0)
-                {
-                    break;
-                }
-            }
-        }
-
 
         public void run(int seconds)
         {
+            var tsks = new HashSet<Task>();
             durationSeconds = seconds;
             var metrics = Metric.Context("shared");
             foreach (var t in tasks)
@@ -149,8 +97,19 @@ namespace ClientPerformance
                 {
                     t.metrics = Metric.Context(t.ToString());
                 }
-                factory.StartNew(() => t.Call());
+                var task = new Task(() => t.Call(),TaskCreationOptions.LongRunning);
+                task.Start();
+                tsks.Add(task);
             }
+            try
+            {
+
+                Task.WaitAll(tsks.ToArray());
+            }
+            catch (Exception)
+            {
+            }
+            Console.WriteLine("TASKS COMPLETE ");
         }
 
         class MyTask
@@ -159,7 +118,6 @@ namespace ClientPerformance
 
             private Random random = new Random();
             private int duration;
-
 
             private byte[] value;
 
@@ -182,7 +140,6 @@ namespace ClientPerformance
 
             public void Call()
             {
-
                 getTimer = metrics.Timer("getTimer", Unit.Requests);
                 putTimer = metrics.Timer("putTimer", Unit.Requests);
                 setTimer = metrics.Timer("setTimer", Unit.Requests);
@@ -190,10 +147,8 @@ namespace ClientPerformance
                 var endTime = DateTime.Now.AddSeconds(duration);
                 while (DateTime.Now.CompareTo(endTime) < 0)
                 {
-                    var map = client.GetMap<object,object>(baseMapName + random.Next(totalMaps));
-
+                    var map = client.GetMap<object, object>(baseMapName + random.Next(totalMaps));
                     double chance = random.NextDouble();
-
                     if ((chance -= putProb) <= 0)
                     {
                         using (putTimer.NewContext())
@@ -216,6 +171,7 @@ namespace ClientPerformance
                         }
                     }
                 }
+                Console.WriteLine("Call DONE...");
             }
         }
     }
