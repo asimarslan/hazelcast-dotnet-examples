@@ -141,7 +141,7 @@ namespace ClientPerformance
             {
                 t.Duration = durationSeconds;
 
-                if (sharedMetrics == 0)
+                if (sharedMetrics > 0)
                 {
                     t.metrics = metrics;
                 }
