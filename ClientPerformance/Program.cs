@@ -67,7 +67,7 @@ namespace ClientPerformance
             Console.WriteLine(Directory.GetCurrentDirectory());
             Metric.Config.WithReporting(report => report.WithCSVReports(cvsDir, TimeSpan.FromSeconds(15)));
 
-            //Metric.Config.WithReporting(report => report.WithConsoleReport(TimeSpan.FromSeconds(10)));
+            Metric.Config.WithReporting(report => report.WithConsoleReport(TimeSpan.FromSeconds(10)));
 
             int jitWarmUpSec = (int)ReadEnvironmentVar("jitWarmUpSec", 10);
             int durationSec = (int)ReadEnvironmentVar("durationSec", 30);
@@ -109,7 +109,7 @@ namespace ClientPerformance
             catch (Exception)
             {
             }
-            Console.WriteLine("TASKS COMPLETE ");
+            Console.WriteLine("=TASKS-COMPLETE=");
         }
 
         class MyTask
@@ -171,7 +171,7 @@ namespace ClientPerformance
                         }
                     }
                 }
-                Console.WriteLine("Call DONE...");
+                //Console.WriteLine("Call DONE...");
             }
         }
     }
