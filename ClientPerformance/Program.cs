@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Threading;
 using Hazelcast.Client;
 using Hazelcast.Core;
 using Metrics;
@@ -65,28 +66,34 @@ namespace ClientPerformance
         static void Main(string[] args)
         {
             Console.WriteLine(Directory.GetCurrentDirectory());
-            Metric.Config.WithReporting(report => report.WithCSVReports(cvsDir, TimeSpan.FromSeconds(15)));
-
-            Metric.Config.WithReporting(report => report.WithConsoleReport(TimeSpan.FromSeconds(10)));
-
-	    Metric.Config.WithReporting(report => report.WithTextFileReport("metrics.txt", TimeSpan.FromSeconds(10));
-
+            
             int jitWarmUpSec = (int)ReadEnvironmentVar("jitWarmUpSec", 10);
             int durationSec = (int)ReadEnvironmentVar("durationSec", 30);
 
             Performance p = new Performance();
-            p.run(jitWarmUpSec);
+            p.run("warmup", jitWarmUpSec);
+            p.run("real", durationSec);  
 
-            p.run(durationSec);  
-  
+            Metric.Config.WithReporting(report => report.WithCSVReports(cvsDir, TimeSpan.FromSeconds(1)));
+            Metric.Config.WithReporting(report => report.WithConsoleReport(TimeSpan.FromSeconds(1)));
+	    Metric.Config.WithReporting(report => report.WithTextFileReport(@".\metrics.txt", TimeSpan.FromSeconds(1)) );
+
+            
+	   try
+           {
+               Thread.Sleep(5000);
+           }
+           catch (Exception) {      }
+ 	      
+
             client.Shutdown();
         }
 
-        public void run(int seconds)
+        public void run(String contextName, int seconds)
         {
             var tsks = new HashSet<Task>();
             durationSeconds = seconds;
-            var metrics = Metric.Context("shared");
+            var metrics = Metric.Context(contextName);
             foreach (var t in tasks)
             {
                 t.Duration = durationSeconds;
