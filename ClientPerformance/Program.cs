@@ -20,6 +20,8 @@ namespace ClientPerformance
         public static int totalMaps = (int)ReadEnvironmentVar("totalMaps", 10);
         public static int totalKeys = (int)ReadEnvironmentVar("totalKeys", 10);
         public static int valueByteArraySize = (int)ReadEnvironmentVar("valueByteArraySize", 10);
+	public static int reportSeconds = (int)ReadEnvironmentVar("reportSeconds", 10);
+
 
         public static double putProb = ReadEnvironmentVar("putProb", 0.5);
         public static double getProb = ReadEnvironmentVar("getProb", 0.5);
@@ -71,20 +73,14 @@ namespace ClientPerformance
             int durationSec = (int)ReadEnvironmentVar("durationSec", 30);
 
             Performance p = new Performance();
-            p.run("warmup", jitWarmUpSec);
+            //p.run("warmup", jitWarmUpSec);
+
+
+	    Metric.Config.WithReporting(report => report.WithCSVReports(cvsDir, TimeSpan.FromSeconds(reportSeconds)));
+            //Metric.Config.WithReporting(report => report.WithConsoleReport(TimeSpan.FromSeconds(reportSeconds)));
+	    //Metric.Config.WithReporting(report => report.WithTextFileReport(@".\metrics.txt", TimeSpan.FromSeconds(reportSeconds)));
+
             p.run("real", durationSec);  
-
-            Metric.Config.WithReporting(report => report.WithCSVReports(cvsDir, TimeSpan.FromSeconds(1)));
-            Metric.Config.WithReporting(report => report.WithConsoleReport(TimeSpan.FromSeconds(1)));
-	    Metric.Config.WithReporting(report => report.WithTextFileReport(@".\metrics.txt", TimeSpan.FromSeconds(1)) );
-
-            
-	   try
-           {
-               Thread.Sleep(5000);
-           }
-           catch (Exception) {      }
- 	      
 
             client.Shutdown();
         }
