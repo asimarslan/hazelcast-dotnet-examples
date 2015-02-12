@@ -69,7 +69,7 @@ namespace ClientPerformance
 
             Metric.Config.WithReporting(report => report.WithConsoleReport(TimeSpan.FromSeconds(10)));
 
-	    Metric.Config.WithReporting(report => report.WithTextFileReport(@"metrics.txt", TimeSpan.FromSeconds(1));
+	    Metric.Config.WithReporting(report => report.WithTextFileReport("metrics.txt", TimeSpan.FromSeconds(1));
 
             int jitWarmUpSec = (int)ReadEnvironmentVar("jitWarmUpSec", 10);
             int durationSec = (int)ReadEnvironmentVar("durationSec", 30);
