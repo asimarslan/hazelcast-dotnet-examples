@@ -156,24 +156,24 @@ namespace ClientPerformance
                     double chance = random.NextDouble();
                     if ((chance -= putProb) <= 0)
                     {
-                        using (putTimer.NewContext())
-                        {
+                        //using (putTimer.NewContext())
+                        //{
                             map.Put(random.Next(totalKeys), value);
-                        }
+                        //}
                      }
                     else if ((chance -= getProb) <= 0)
                     {
-                        using (getTimer.NewContext())
-                        {
+                        //using (getTimer.NewContext())
+                        //{
                             map.Get(random.Next(totalKeys));
-                        }
+                        //}
                     }
                     else
                     {
-                        using (setTimer.NewContext())
-                        {
+                        //using (setTimer.NewContext())
+                        //{
                             map.Set(random.Next(totalKeys), value);
-                        }
+                        //}
                     }
                 }
                 //Console.WriteLine("Call DONE...");
